@@ -1,6 +1,6 @@
 % Script to convert existing dataset to BIDS format
 % Alex von Lautz @NNU @OHBA
-% License CC0
+% License Creative Commons - 0
 
 % My first foray into converting my data into the BIDS format for data
 % sharing.
@@ -68,7 +68,7 @@ end
 % Then I can put in the configuration structure as follows
 % Note that I am taking the .bdf dataset from the sourcedirectory and am
 % creating a new .edf in the acquisition folder
-for dosub=1:length(subj_id)
+for dosub=1:length(subj_ids)
  cfg = [];
     cfg.dataset                     = sdata{dosub};
     cfg.outputfile                  = bdata{dosub};
@@ -88,7 +88,6 @@ for dosub=1:length(subj_id)
         
     data2bids(cfg)
 end
-
 %% Create dataset specific sidecar files
 % There are three main sidecar files:
 % 1 dataset_description.json file
