@@ -1,6 +1,7 @@
 % Script to convert existing dataset to BIDS format
 % Alex von Lautz @NNU @OHBA
 % License Creative Commons - 0
+% BIDS BEP006 - extension for EEG
 
 % My first foray into converting my data into the BIDS format for data
 % sharing.
@@ -49,8 +50,8 @@ end
 % I cannot split the data into different runs. In BIDS terms we had 8 runs
 % for each subject. I will worry about this later and go ahead and copy my
 % raw data over as a whole.
-for dosub=1:length(subj_ids)
-    sourcefolder{dosub}=fullfile(output_dir,['sub-' subj_ids(dosub,2:3)],'eeg','sourcedata');
+for dosub=1:length(subj_ids); disp(['copying raw data for subject ' num2str(dosub)])
+    sourcefolder{dosub}=fullfile(output_dir,'sourcedata',['sub-' subj_ids(dosub,2:3)],'eeg');
     mkdir(sourcefolder{dosub})
     %define source data (.bdf)
     sdata{dosub}=fullfile(sourcefolder{dosub},['sub-' subj_ids(dosub,2:3) '_task-Magdot_eeg.bdf']);
@@ -68,7 +69,7 @@ end
 % Then I can put in the configuration structure as follows
 % Note that I am taking the .bdf dataset from the sourcedirectory and am
 % creating a new .edf in the acquisition folder
-for dosub=1:length(subj_ids)
+for dosub=1:length(subj_ids); disp(['creating sidecar subject ' num2str(dosub)])
  cfg = [];
     cfg.dataset                     = sdata{dosub};
     cfg.outputfile                  = bdata{dosub};
@@ -81,11 +82,17 @@ for dosub=1:length(subj_ids)
     cfg.TaskName                    = 'Magdot';
     cfg.TaskDescription             = 'Subjects were presented with two subsequent random-dot motion patches and had to judge whether the second had more coherent motion than the first';
     cfg.eeg.PowerLineFrequency      = 50;  % German recordings
-    cfg.eeg.EEGReference            = 'N/A'; % Active electrode system is not using a reference, in analyses the common average of all electrodes is typically used
+    cfg.eeg.EEGReference            = 'CMS, placed on PO5'; % Active electrode system!
+    cfg.eeg.EEGGround               = 'DRL, placed on PO6'; % Active electrode system!
     cfg.Instructions                = 'Perceive the RDM patches and respond via button press (index/middle finger) whether the second RDM patch was more coherent than the first';
     cfg.CogAtlasID                  = 'trm_4f244ad7dcde7';
     cfg.CogPOID                     = 'http://wiki.cogpo.org/index.php?title=Random_Dots'; % Cannot find the ID, so link
-        
+
+    cfg.trigger.event           = 'test';
+    cfg.trigger.eventtype       = 'STATUS';
+    cfg.trigger.eventvalue      = 101;
+    cfg.presentation.eventtype  = 'STATUS';
+    cfg.presentation.eventvalue = 101;   
     data2bids(cfg)
 end
 %% Create dataset specific sidecar files
@@ -98,7 +105,7 @@ end
 % For this we need to have a way to save to .json, I use the jsonlab
 % toolbox and the function savejson
 
-dataset_description.BIDSVersion='1.2.0';
+dataset_description.BIDSVersion='1.0.2';
 dataset_description.License= 'CC0';
 dataset_description.Name='Magdot EEG dataset';
 dataset_description.Authors='von Lautz,AH';
@@ -119,6 +126,12 @@ writetable(tsv_file,[output_dir,'participants.tsv'],'FileType','text','Delimiter
 
 % 3 README file
 % Of course we also want to tell people exactly what this project is about
-readme=' This is EEG data from the Magdot project. \n I converted it using a tutorial-style script that can be found on https://github.com/alexvonlautz/FFW_BIDS';
+readme=' This is EEG data from the Magdot project. \n I converted it using a tutorial-style script that can be found on https://github.com/alexvonlautz/FFW_BIDS \n Find a task descpription in the dataset_description.json';
 fid=fopen([output_dir,'readme.txt'],'w');
 fprintf(fid, readme);
+
+%% Behaviour recorded during EEG
+
+%% BIDS Validator
+% An important step is to validate the BIDS files. I am using the
+% BIDS-validor for this
