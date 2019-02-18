@@ -131,6 +131,12 @@ fid=fopen([output_dir,'readme.txt'],'w');
 fprintf(fid, readme);
 
 %% Behaviour recorded during EEG
+% The crucial part here is to structure all the information in a meaningful
+% file per subject. Basis of this are the EEG-triggers, but also other
+% logfiles collected previously.
+% We need one column per variable (e.g. triggervalue, trialnumber,
+% recording-block, randomization condition, stimulus property etc.) and
+% each row is one event (at least the number of triggervalues)
 
 %% BIDS Validator
 % An important step is to validate the BIDS files. I am using the
